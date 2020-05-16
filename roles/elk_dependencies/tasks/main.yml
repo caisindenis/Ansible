@@ -1,0 +1,9 @@
+- name: ELK install package dependencies
+  apt:
+    pkg:
+      - openjdk-11-jre
+      - apt-transport-https
+      - wget
+      - nginx
+    state: present
+    update_cache: yes

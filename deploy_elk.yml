@@ -1,0 +1,9 @@
+---
+- hosts: localhost
+  become: yes
+  become_user: root
+  roles:
+    - { role: elk_dependencies }
+    - { role: elasticsearch }
+    - { role: kibana }
+    - { role: metricbeat }

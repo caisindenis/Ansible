@@ -1,0 +1,65 @@
+- name: Get ES apt key
+  apt_key:
+    url: "https://packages.elastic.co/GPG-KEY-elasticsearch"
+    state: present
+
+- name: Get ES repo
+  apt_repository:
+    repo: deb https://artifacts.elastic.co/packages/7.x/apt stable main
+    state: present
+
+- name: Install ES
+  apt:
+    name: elasticsearch
+    update_cache: yes
+
+- name: Updating the config file to allow access to localhost
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'network.host:'
+   line: 'network.host: 0.0.0.0'
+
+- name: Updating the port in config file
+  lineinfile:
+   destfile: /etc/elasticsearch/elasticsearch.yml
+   regexp: 'http.port:'
+   line: 'http.port: 9200'
+
+- name: Disable xpack ml
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: 'xpack.ml.enabled'
+    line: 'xpack.ml.enabled: false'
+
+- name: Enable single node config
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: 'discovery.type'
+    line: 'discovery.type: single-node'
+
+- name: Change ES logs path dir
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: 'path.logs'
+    line: 'path.logs: /data/elastic/var/log/elasticsearch'
+
+- name: Change ES data path dir
+  lineinfile:
+    destfile: /etc/elasticsearch/elasticsearch.yml
+    regexp: 'path.data'
+    line: 'path.data: /data/elastic/var/lib/elasticsearch'
+
+- name: Creating ES direcotries for logs and data
+  file:
+    path: "{{ item }}"
+    recurse: yes
+    owner: elasticsearch
+  with_items:
+    - /data/elastic/var/log/elasticsearch
+    - /data/elastic/var/lib/elasticsearch
+
+- name: Starting Elasticsearch
+  service:
+    name: elasticsearch
+    state: started
+
